@@ -1,5 +1,5 @@
 pytest
-numpy==1.20.3
+numpy
 astropy
 scipy
 datetime
