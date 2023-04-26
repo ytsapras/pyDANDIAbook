@@ -426,36 +426,31 @@ def moon_brightness_header(header,row_idx):
         else:
             return 'bright'
 
-
 def add_stage1_rank(reduction_metadata, image_stats_entry):
     """
     Image ranking based on the data_inventory (stage1 metadata)
+    Ranks images according to the background noise contribution and
+    the FWHM of the image. Can select a reference with higher FWHM if
+    no low background image is available.
 
     :param object reduction_metadata: the metadata object
 
     """
-    target_magnitude = 19.  # to be defined in metadata, optimally suited for
-                            # fainter mag 19 stars (sky more relevant)
-    magzero_electrons = 1.47371235e+09
 
     # finding the index of the stats_entry image in the headers
     header_idx = list(reduction_metadata.headers_summary[1]['IMAGES']).index(
         image_stats_entry['IM_NAME'])
-    # needs to be updated so that the corresponding values
-    # can be configured
-    signal_electrons = 10.0**(-0.4 * electrons_per_second_sinistro(
-        magzero_electrons, target_magnitude)) * float(reduction_metadata.reduction_parameters[1]['GAIN']) * float(reduction_metadata.headers_summary[1][header_idx]['EXPKEY'])
+
     sky = float(image_stats_entry['SKY'])
-    sky_electrons = sky * \
-        float(reduction_metadata.reduction_parameters[1]['GAIN'])
-    # Simplified number of pixels for optimal aperture photometry
     fwhm_avg = float(image_stats_entry['FWHM'])
     npix = np.pi * \
         float(reduction_metadata.reduction_parameters[1]['PIX_SCALE']) * (
             0.67 * fwhm_avg)**2
-
     readout_noise = float(reduction_metadata.reduction_parameters[1]['RON'])
-    return (signal_electrons) / (signal_electrons + npix * (sky_electrons + readout_noise**2))**0.5
+    sky_electrons = sky * \
+        float(reduction_metadata.reduction_parameters[1]['GAIN'])
+
+    return 1 / (npix * (sky_electrons + readout_noise**2))**0.5
 
 def add_stage1_rank_sharpest(reduction_metadata, image_stats_entry):
     """
