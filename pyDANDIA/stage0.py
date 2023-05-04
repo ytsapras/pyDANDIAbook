@@ -558,7 +558,7 @@ def parse_the_image_header(reduction_metadata, open_image):
                 header_infos.append(info)
 
         for key in ['HJD']:
-            info = [key, 0.0, np.float]
+            info = [key, 0.0, float]
             header_infos.append(info)
 
     return np.array(header_infos)
